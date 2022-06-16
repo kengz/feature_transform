@@ -53,8 +53,11 @@ data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
 xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
 
+# to reload the fitted transformers for validation/test, specify stage='validate' or 'test'
+val_df = data_df.copy()
+val_xs, val_ys = transform.fit_transform(spec, stage='validate', df=val_df)
 
-# to reload the fitted transformers for use in validation/test
+# artifacts to get the column transformers and transformed names directly
 artifacts = transform.get_artifacts(spec)
 artifacts['mode2col_transfmr']
 # {'x': ColumnTransformer(n_jobs=1, sparse_threshold=0, transformers=[('sepal length (cm)', Pipeline(steps=[('standardscaler',...
@@ -130,6 +133,10 @@ spec = util.read('transform.yaml')
 data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
 xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
+
+# to reload the fitted transformers for validation/test, specify stage='validate' or 'test'
+val_df = data_df.copy()
+val_xs, val_ys = transform.fit_transform(spec, stage='validate', df=val_df)
 ```
 
 ### Chain Preprocessors
