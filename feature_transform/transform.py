@@ -237,7 +237,7 @@ def load_col_transfmr(spec: dict, mode: str) -> ColumnTransformer:
 
 
 def get_fit_transform(df: pd.DataFrame, spec: dict, mode: str, dtype: type = np.float32, module: str = 'sklearn', n_jobs: int = -1, load: bool = False) -> tuple[np.ndarray, ColumnTransformer]:
-    logger.info(f'Running for mode: {mode}')
+    logger.info(f'Transforming mode: {mode}')
     mode_trans_spec = spec['transform'][mode]
     if module == 'dask_ml':
         _fix_dask_df(df, mode_trans_spec)
@@ -251,15 +251,14 @@ def get_fit_transform(df: pd.DataFrame, spec: dict, mode: str, dtype: type = np.
         setattr(col_transfmr, 'transformed_names_', get_transformed_names(col_transfmr))
         save_col_transfmr(col_transfmr, spec, mode)
 
-    logger.info(f'{mode} shape {trans_data.shape}, features: {col_transfmr.transformed_names_}')
-    logger.info('Done')
+    logger.info(f'scalar-transformed {mode} shape {trans_data.shape}, features: {col_transfmr.transformed_names_}')
     return trans_data, col_transfmr
 
 
 # transform module interface methods
 
 
-def fit_transform(spec: dict, stage: str, df: pd.DataFrame) -> list:
+def fit_transform(spec: dict, stage: str, df: pd.DataFrame) -> dict:
     '''
     Fit transform input dataframe according to spec with the following format (in YAML):
     ```yaml
@@ -274,6 +273,8 @@ def fit_transform(spec: dict, stage: str, df: pd.DataFrame) -> list:
                 {preprocessor}: {null|kwargs}
                 ...
     ```
+    And the returned mode2data dict has the format {mode: np.ndarray}
+
     For example, the following spec (in YAML) transforms the iris dataframe by chaining Log1pScaler then StandardScalar to each column and produce the input `x`, and do one-hot encoding for the target column for output `y`:
     ```yaml
     dataset:
@@ -300,16 +301,18 @@ def fit_transform(spec: dict, stage: str, df: pd.DataFrame) -> list:
                     sparse: false
                     handle_unknown: ignore
     ```
+    The returned mode2data dict has the format {'x': np.ndarray, 'y': np.ndarray}
     @param spec:dict Specification of the transform
     @param stage:str Stage of the transform. If 'fit', create a new instance of ColumnTransformers and run fit_transform. If 'test' or 'validate', load existing ColumnTransformers and run transform.
     @param df:pd.DataFrame Input dataframe
+    @returns dict:mode2data {mode: np.ndarray, ...}
     '''
-    trans_data_list = []
+    mode2data = {}
     load = (stage != 'fit')  # other values used commonly in ml includes 'test', 'validate'. Those will load a fitted column transformer instead
     for mode in spec['transform']:
         trans_data, col_transfmr = get_fit_transform(df, spec, mode, dtype=np.float32, load=load, **spec['dataset']['transform'])
-        trans_data_list.append(trans_data)
-    return trans_data_list
+        mode2data[mode] = trans_data
+    return mode2data
 
 
 def get_artifacts(spec: dict) -> dict:

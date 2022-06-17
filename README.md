@@ -51,11 +51,13 @@ spec = {
 # load iris dataframe
 data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
-xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
+mode2data = transform.fit_transform(spec, stage='fit', df=data_df)
+xs, ys = mode2data['x'], mode2data['y']
 
 # to reload the fitted transformers for validation/test, specify stage='validate' or 'test'
 val_df = data_df.copy()
-val_xs, val_ys = transform.fit_transform(spec, stage='validate', df=val_df)
+mode2val_data = transform.fit_transform(spec, stage='validate', df=val_df)
+val_xs, val_ys = mode2val_data['x'], mode2val_data['y']
 
 # artifacts to get the column transformers and transformed names directly
 artifacts = transform.get_artifacts(spec)
@@ -132,11 +134,13 @@ spec = util.read('transform.yaml')
 # load iris dataframe
 data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
-xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
+mode2data = transform.fit_transform(spec, stage='fit', df=data_df)
+xs, ys = mode2data['x'], mode2data['y']
 
 # to reload the fitted transformers for validation/test, specify stage='validate' or 'test'
 val_df = data_df.copy()
-val_xs, val_ys = transform.fit_transform(spec, stage='validate', df=val_df)
+mode2val_data = transform.fit_transform(spec, stage='validate', df=val_df)
+val_xs, val_ys = mode2val_data['x'], mode2val_data['y']
 ```
 
 ### Chain Preprocessors
@@ -222,14 +226,16 @@ spec = util.read('transform.yaml')
 # load iris dataframe
 data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
-xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
+mode2data = transform.fit_transform(spec, stage='fit', df=data_df)
+xs, ys = mode2data['x'], mode2data['y']
 
 train_dataset = TensorDataset(torch.from_numpy(xs), torch.from_numpy(ys)) # create your datset
 train_dataloader = DataLoader(train_dataset) # create your dataloader
 
 # suppose this is test/validation set; use stage='validate' or stage='test' to transform
 val_df = data_df.copy()
-val_xs, val_ys = transform.fit_transform(spec, stage='validate', df=val_df)
+mode2val_data = transform.fit_transform(spec, stage='validate', df=val_df)
+val_xs, val_ys = mode2val_data['x'], mode2val_data['y']
 val_dataset = TensorDataset(torch.from_numpy(val_xs), torch.from_numpy(val_ys))
 val_dataloader = DataLoader(val_dataset) # create your dataloader
 ```
@@ -247,7 +253,8 @@ spec = util.read('transform.yaml')
 # load iris dataframe
 data_df = pd.concat(datasets.load_iris(return_X_y=True, as_frame=True), axis=1)
 # transform into numpy arrays ready for model
-xs, ys = transform.fit_transform(spec, stage='fit', df=data_df)
+mode2data = transform.fit_transform(spec, stage='fit', df=data_df)
+xs, ys = mode2data['x'], mode2data['y']
 
 # train model
 model = DecisionTreeClassifier(max_depth = 3, random_state = 1)
@@ -258,7 +265,8 @@ print(f'train accuracy: {metrics.accuracy_score(pred_ys, ys):.3f}')
 
 # suppose this is validation/test data, we use stage='validate' or 'test
 test_df = data_df.copy()
-test_xs, test_ys = transform.fit_transform(spec, stage='test', df=test_df)
+mode2test_data = transform.fit_transform(spec, stage='test', df=test_df)
+test_xs, test_ys = mode2val_data['x'], mode2val_data['y']
 pred_ys = model.predict(test_xs)
 print(f'test accuracy: {metrics.accuracy_score(pred_ys, test_ys):.3f}')
 # test accuracy: 0.973

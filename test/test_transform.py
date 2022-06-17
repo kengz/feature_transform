@@ -24,7 +24,8 @@ import pytest
 ])
 @pytest.mark.parametrize('stage', ['fit', 'test', 'validate'])
 def test_fit_transform(spec, stage, test_data_df):
-    xs, ys = transform.fit_transform(spec, stage, test_data_df)
+    mode2data = transform.fit_transform(spec, stage, test_data_df)
+    xs, ys = mode2data['x'], mode2data['y']
     assert isinstance(xs, np.ndarray)
     assert isinstance(ys, np.ndarray)
     assert len(xs) == len(ys)
@@ -87,8 +88,8 @@ def test_fit_transform(spec, stage, test_data_df):
 ])
 @pytest.mark.parametrize('stage', ['fit'])
 def test_transform_spec(spec, stage, test_data_df):
-    data_list = transform.fit_transform(spec, stage, test_data_df)
-    for data in data_list:
+    mode2data = transform.fit_transform(spec, stage, test_data_df)
+    for mode, data in mode2data.items():
         assert isinstance(data, np.ndarray)
     artifacts = transform.get_artifacts(spec)
     for mode, col_transfmr in artifacts['mode2col_transfmr'].items():

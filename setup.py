@@ -32,7 +32,7 @@ class PyTest(TestCommand):
 
 setup(
     name='feature_transform',
-    version='0.1.0',
+    version='0.2.0',
     description='Build feature transformer by specifying transformation.',
     long_description='https://github.com/kengz/feature_transform',
     keywords='feature_transform',
