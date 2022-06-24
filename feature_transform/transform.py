@@ -1,12 +1,13 @@
+from feature_transform import util
 from functools import partial
 from loguru import logger
-from feature_transform import util
 from pathlib import Path
 from sklearn.base import TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import FunctionTransformer
 from typing import Union
+import importlib
 import numpy as np
 import pandas as pd
 import pydash as ps
@@ -124,22 +125,12 @@ def get_transformed_names(col_transfmr: ColumnTransformer) -> list:
 # ColumnTransformer composer methods
 
 
-def _get_module(module: str) -> type:
-    if module == 'sklearn':
-        return sklearn
-    elif module == 'dask_ml':
-        return dask_ml
-    else:
-        raise ValueError(f'Unrecognized module {module} not of sklearn, dask_ml')
-
-
 def _get_transfmr_cls(name: str, module: str = 'sklearn') -> type:
     '''Get a transfmr class from sklearn/dask_ml(parallel) by scanning preprocessing then feature_extraction'''
-    m = _get_module(module)
-    try:
-        Transfmr = getattr(m.preprocessing, name)
-    except AttributeError:
-        Transfmr = getattr(m.feature_extraction, name)
+    name = name if '.' in name else f'preprocessing.{name}'  # default to preprocessing
+    module_path, class_name = f'{module}.{name}'.rsplit('.', 1)
+    module = importlib.import_module(module_path)
+    Transfmr = getattr(module, class_name)
     return Transfmr
 
 
@@ -165,7 +156,7 @@ def _get_pipeline(trans: dict, module: str = 'sklearn') -> Pipeline:
     - {'Log1pScaler': None, 'StandardScaler': None}
     - {'Log1pScaler': None, 'Clipper': {'a_min': 0, 'a_max': 10}}
     '''
-    assert ps.is_dict(trans), f'Transform spec must be a dict, but got {trans}'
+    assert hasattr(trans, 'items'), f'Transform spec must be a key-value pair, but got {trans}'
     transfmrs = []
     for name, v in trans.items():
         kwargs = v or {}
@@ -192,10 +183,10 @@ def get_col_transfmr(mode_trans_spec: dict, module: str = 'sklearn', n_jobs: int
         (col, _get_pipeline(trans, module), [col])
         for col, trans in mode_trans_spec.items()
     ]
-    m = _get_module(module)
     # ensure return of consistent np array and non-sparse matrix
     kwargs = {'perserve_dataframe': False, 'sparse_threshold': 0} if module == 'dask_ml' else {'sparse_threshold': 0}
-    col_transfmr = m.compose.ColumnTransformer(transformers, n_jobs=n_jobs, **kwargs)
+    module = importlib.import_module(f'{module}.compose')
+    col_transfmr = module.ColumnTransformer(transformers, n_jobs=n_jobs, **kwargs)
     return col_transfmr
 
 

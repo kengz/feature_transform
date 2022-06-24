@@ -65,6 +65,20 @@ def test_fit_transform(spec, stage, test_data_df):
             'transform': {'module': 'sklearn', 'n_jobs': None}
         },
         'transform': {
+            'x': {  # different modules using path
+                'sepal length (cm)': {'StandardScaler': None},
+                'petal width (cm)': {'StandardScaler': None, 'impute.SimpleImputer': {'strategy': 'constant', 'fill_value': -1}},
+            },
+            'y': {
+                'target': {'Identity': None},
+            }
+        }
+    },
+    {
+        'dataset': {
+            'transform': {'module': 'sklearn', 'n_jobs': None}
+        },
+        'transform': {
             'foo': {  # different modes
                 'sepal length (cm)': {'Log1pScaler': None, 'StandardScaler': None},
                 'sepal width (cm)': {'Clipper': {'a_min': 0, 'a_max': 10}, 'StandardScaler': None},
