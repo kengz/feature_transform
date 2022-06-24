@@ -173,6 +173,31 @@ transform:
         handle_unknown: ignore
 ```
 
+### Specify any module
+
+By default the config refers to classes in the `preprocessing` module of sklearn/dask-ml. Use dot-notation to specify other modules:
+
+```yaml
+dataset:
+  transform:
+    module: sklearn
+    n_jobs: null
+transform:
+  x:
+    a_float_column:
+      StandardScaler:
+    a_column_with_dict_values:
+      feature_extraction.DictVectorizer:
+    a_column_with_na:
+      StandardScaler:
+      impute.SimpleImputer: # handle na values
+        strategy: constant
+        fill_value: -1
+  y:
+    a_target_column:
+      Identity:
+```
+
 ### Specify any modes
 
 The modes can be any names other than `x, y`:

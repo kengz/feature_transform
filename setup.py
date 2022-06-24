@@ -32,7 +32,7 @@ class PyTest(TestCommand):
 
 setup(
     name='feature_transform',
-    version='0.2.0',
+    version='0.3.0',
     description='Build feature transformer by specifying transformation.',
     long_description='https://github.com/kengz/feature_transform',
     keywords='feature_transform',
@@ -48,7 +48,6 @@ setup(
         'pydash>=4.7.6',
         'pyyaml>=5.3.0',
         'scikit-learn>=0.24.0',
-
     ],
     zip_safe=False,
     include_package_data=True,
