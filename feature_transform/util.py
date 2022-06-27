@@ -8,6 +8,10 @@ import os
 import pandas as pd
 import pydash as ps
 import yaml
+try:
+    import hydra
+except ImportError:
+    pass
 
 
 class JsonEncoder(json.JSONEncoder):
@@ -42,6 +46,26 @@ def abspath(data_path: str, as_dir: bool = False) -> Path:
     if as_dir and data_path.is_file():
         data_path = data_path.parent
     return data_path.resolve()
+
+
+def cfg_to_dict(cfg) -> dict:
+    '''Convert hydra config to dict to allow dict operations'''
+    return hydra.utils.instantiate(cfg, _convert_='all')  # convert to dict
+
+
+def get_cfg(config_dir: str, config_name: str = 'config.yaml', overrides: list = []):
+    '''
+    Convenience method to get hydra config outside of @hydra
+    @example
+    from pathlib import Path
+    from feature_transformer import util
+
+    DIR = Path(__file__).parent
+    cfg = util.get_cfg(DIR / 'config')
+    '''
+    with hydra.initialize_config_dir(version_base=None, config_dir=str(config_dir)):
+        cfg = hydra.compose(config_name, overrides=overrides)
+    return cfg
 
 
 def get_file_ext(data_path: str) -> str:
@@ -164,7 +188,7 @@ def write(data: Any, data_path: str, **kwargs) -> str:
 def write_as_df(data: Any, data_path: str, **kwargs) -> str:
     '''Submethod to write data as DataFrame'''
     df = pd.DataFrame(data) if isinstance(data, pd.DataFrame) else data
-    df.to_csv(data_path, index=False, **kwargs)
+    df.to_csv(data_path, **kwargs)
     return data_path
 
 
