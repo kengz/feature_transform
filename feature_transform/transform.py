@@ -164,12 +164,13 @@ def _get_pipeline(trans: dict, module: str = 'sklearn') -> Pipeline:
     return make_pipeline(*transfmrs)
 
 
-def get_col_transfmr(mode_trans_spec: dict, module: str = 'sklearn', n_jobs: int = -1) -> ColumnTransformer:
+def get_col_transfmr(mode_trans_spec: dict, module: str = 'sklearn', n_jobs: int = -1, preserve_dataframe: bool = False) -> ColumnTransformer:
     '''
     Get a ColumnTransformer to transform dataframe into np matrix
     - mode_trans_spec format: {df_col: trans_spec}, where trans_spec is described in _get_pipeline()
     - module options: 'sklearn' (serial-row) or 'dask_ml' (parallel-row)
     - n_jobs: -1 to use all cores
+    - preserve_dataframe: to return dataframe for dask_ml
     @examples
 
     mode_trans_spec = spec['transform'][mode]
@@ -184,7 +185,7 @@ def get_col_transfmr(mode_trans_spec: dict, module: str = 'sklearn', n_jobs: int
         for col, trans in mode_trans_spec.items()
     ]
     # ensure return of consistent np array and non-sparse matrix
-    kwargs = {'perserve_dataframe': False, 'sparse_threshold': 0} if module == 'dask_ml' else {'sparse_threshold': 0}
+    kwargs = {'preserve_dataframe': preserve_dataframe, 'sparse_threshold': 0} if module == 'dask_ml' else {'sparse_threshold': 0}
     module = importlib.import_module(f'{module}.compose')
     col_transfmr = module.ColumnTransformer(transformers, n_jobs=n_jobs, **kwargs)
     return col_transfmr
@@ -227,7 +228,7 @@ def load_col_transfmr(spec: dict, mode: str) -> ColumnTransformer:
     return col_transfmr
 
 
-def get_fit_transform(df: pd.DataFrame, spec: dict, mode: str, dtype: type = np.float32, module: str = 'sklearn', n_jobs: int = -1, load: bool = False) -> tuple[np.ndarray, ColumnTransformer]:
+def get_fit_transform(df: pd.DataFrame, spec: dict, mode: str, dtype: type = np.float32, module: str = 'sklearn', n_jobs: int = -1, preserve_dataframe: bool = False, load: bool = False) -> tuple[np.ndarray, ColumnTransformer]:
     logger.info(f'Transforming mode: {mode}')
     mode_trans_spec = spec['transform'][mode]
     if module == 'dask_ml':
@@ -237,7 +238,7 @@ def get_fit_transform(df: pd.DataFrame, spec: dict, mode: str, dtype: type = np.
         col_transfmr = load_col_transfmr(spec, mode)
         trans_data = col_transfmr.transform(df).astype(dtype)
     else:
-        col_transfmr = get_col_transfmr(mode_trans_spec, module, n_jobs)
+        col_transfmr = get_col_transfmr(mode_trans_spec, module, n_jobs, preserve_dataframe)
         trans_data = col_transfmr.fit_transform(df).astype(dtype)
         setattr(col_transfmr, 'transformed_names_', get_transformed_names(col_transfmr))
         save_col_transfmr(col_transfmr, spec, mode)
