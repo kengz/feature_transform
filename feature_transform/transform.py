@@ -97,8 +97,22 @@ def _get_transformed_names(col_transfmr: ColumnTransformer, trans: Union[str, Tr
     return [f'{col}' for col in trans.get_feature_names_out()]
 
 
+def _dedupe_ct_prefix(name: str) -> str:
+    '''Remove transfomer__pipeline name prefix dupe like {NAME}__{NAME}_{n}'''
+    left, right = name.split('__')
+    if right.startswith(left):
+        return right
+    else:
+        return name
+
+
 def get_transformed_names(col_transfmr: ColumnTransformer) -> list:
     '''Get the transformed_names for ColumnTransformer'''
+    try:
+        transformed_names = col_transfmr.get_feature_names_out()  # use the built in if available
+        return [_dedupe_ct_prefix(name) for name in transformed_names]
+    except Exception:
+        pass
     # allow transformers to be pipelines. Pipeline steps are ordered differently, so need some processing
     if type(col_transfmr) == Pipeline:
         tfmrs_list = [(_auto_name, trans, None, None) for step, _auto_name, trans in col_transfmr._iter()]
