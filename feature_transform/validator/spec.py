@@ -309,7 +309,7 @@ def build(spec: dict | str) -> sklearn.compose.ColumnTransformer:
     #     ]
     # )
     """
-    if not isinstance(spec, dict):
+    if isinstance(spec, (str, Path)):
         with Path(spec).open("r") as f:
             spec = yaml.safe_load(f)
     return Spec(**spec).build()
