@@ -1,0 +1,10 @@
+transformers:
+  - transformer:
+      preprocessing.StandardScaler:
+    columns: [alcohol, total_phenols]
+  - transformer:
+      preprocessing.RobustScaler:
+    columns: [ash]
+# use all processors
+n_jobs: -1
+# for more kwargs see https://scikit-learn.org/stable/modules/generated/sklearn.compose.make_column_transformer.html

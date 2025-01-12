@@ -1,5 +1,6 @@
 # Project
 data/
+*.joblib
 
 # System
 .DS_Store
