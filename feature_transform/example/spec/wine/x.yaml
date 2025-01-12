@@ -1,0 +1,11 @@
+transformers:
+  - transformer:
+      preprocessing.StandardScaler:
+    columns: [alcohol, total_phenols, flavanoids, nonflavanoid_phenols, od280/od315_of_diluted_wines]
+  - transformer:
+      preprocessing.RobustScaler:
+    columns: [ash, alcalinity_of_ash, proanthocyanins, hue]
+  - transformer:
+      preprocessing.PowerTransformer:
+    columns: [malic_acid, magnesium, color_intensity, proline]
+n_jobs: -1

@@ -1,0 +1,7 @@
+transformers:
+  - transformer:
+      preprocessing.StandardScaler:
+    columns: [alcohol, total_phenols]
+  - transformer:
+      preprocessing.RobustScaler:
+    columns: [ash]

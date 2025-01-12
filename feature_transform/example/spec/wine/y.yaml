@@ -1,0 +1,5 @@
+transformers:
+  - transformer:
+      preprocessing.OneHotEncoder:
+        sparse_output: False
+    columns: [target]

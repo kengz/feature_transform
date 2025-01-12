@@ -1,0 +1,9 @@
+transformers:
+  - name: std
+    transformer:
+      preprocessing.StandardScaler:
+    columns: [0, 5]
+  - name: robust
+    transformer:
+      preprocessing.RobustScaler:
+    columns: [2]

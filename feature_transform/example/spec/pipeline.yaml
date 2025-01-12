@@ -1,0 +1,10 @@
+transformers:
+  - transformer:
+      preprocessing.StandardScaler:
+    columns: [alcohol, total_phenols]
+  - transformer:
+      Pipeline:
+        - impute.SimpleImputer:
+            strategy: constant
+        - preprocessing.RobustScaler:
+    columns: [ash]
