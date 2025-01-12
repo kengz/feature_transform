@@ -326,6 +326,31 @@ ColumnTransformer `y_col_tfm`:
 
 ---
 
+### Example: use helper to suggest spec
+
+Most of the time, data preprocessing steps can be determined with rules-of-thumb; `ft.suggest` does exactly that (see [feature_transform/helper.py](feature_transform/helper.py) for details). This produces `spec_dict` that can be used directly with `ft.build` or for further editing.
+
+```python
+x_df, y_sr = datasets.load_wine(return_X_y=True, as_frame=True)
+
+# suggest spec_dict - use directly or save to yaml for further editing
+spec_dict = ft.suggest(x_df)
+col_tfm = ft.build(spec_dict)
+
+# fit-transform
+feat_xs = col_tfm.fit_transform(x_df)
+feat_xs
+# array([[ 0.8973384 ,  0.20143885, -0.90697674, ...,  0.80804954,
+#         -0.43546273,  1.69074868],
+#         ...,
+```
+
+ColumnTransformer `col_tfm`:
+
+![](images/suggest.png)
+
+---
+
 ### Example: more
 
 See more examples:

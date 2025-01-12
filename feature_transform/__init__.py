@@ -2,6 +2,7 @@ from pathlib import Path
 
 import sklearn
 
+from feature_transform.helper import suggest  # noqa
 from feature_transform.validator.spec import Spec, build  # noqa
 
 SPEC_DIR = Path(__file__).parent / "example" / "spec"
